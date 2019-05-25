@@ -98,7 +98,6 @@ def movies(request):
 
 @csrf_exempt
 def comments(request):
-
     # POST /comments
     if request.method == 'POST':
 
@@ -113,7 +112,7 @@ def comments(request):
             }
             return JsonResponse(response)
 
-        # Is there a movie, with user inputted movie id?
+        # Validate movie exists
         qs = Movie.objects.all()
         if movie_id not in [str(q) for q in qs]:
             response = {
@@ -131,3 +130,16 @@ def comments(request):
         return HttpResponse(new_comment_json, content_type='application/json')
 
     # GET /comments
+    else:
+
+        # Filter by movie ID, if user provided
+        movie_id = request.GET.get('movie_id')
+        if movie_id:
+            qs = Comment.objects.filter(movie__imdbid=movie_id)
+            qs_json = serializers.serialize('json', qs)
+            return HttpResponse(qs_json, content_type='application/json')
+
+        # return all comments
+        all_comments = Comment.objects.all()
+        all_comments_json = serializers.serialize('json', all_comments)
+        return HttpResponse(all_comments_json, content_type='application/json')
