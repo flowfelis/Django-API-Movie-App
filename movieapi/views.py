@@ -5,7 +5,7 @@ from django.http import JsonResponse
 from django.core import serializers
 from django.views.decorators.csrf import csrf_exempt
 
-from .models import Movie
+from .models import Movie, Comment
 
 import requests
 
@@ -98,6 +98,8 @@ def movies(request):
 
 @csrf_exempt
 def comments(request):
+
+    # POST /comments
     if request.method == 'POST':
 
         # Get user input
@@ -110,3 +112,22 @@ def comments(request):
                 'error': 'Please provide movie ID and comment'
             }
             return JsonResponse(response)
+
+        # Is there a movie, with user inputted movie id?
+        qs = Movie.objects.all()
+        if movie_id not in [str(q) for q in qs]:
+            response = {
+                'error': 'Movie with movie id {movie_id}, doesn\'t exist in DB'.format(movie_id=movie_id)
+            }
+            return JsonResponse(response)
+
+        # Save comment to DB
+        movie = Movie.objects.get(imdbid=movie_id)
+        new_comment = Comment(comment=comment, movie=movie)
+        new_comment.save()
+
+        # Return newly saved comment
+        new_comment_json = serializers.serialize('json', [new_comment])[1:-1]
+        return HttpResponse(new_comment_json, content_type='application/json')
+
+    # GET /comments
