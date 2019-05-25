@@ -1,0 +1,13 @@
+.DS_Store
+.idea/
+.vs_code/
+settings.py
+*.pyc
+/media/
+Testing/
+Design Files
+.dockerignore
+DockerFile
+.sandbox/
+db.sqlite3
+__pycache__/
