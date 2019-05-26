@@ -36,4 +36,4 @@ class Comment(models.Model):
 
     comment = models.TextField()
     movie = models.ForeignKey(Movie, on_delete=models.CASCADE, null=True)
-    added_on = models.DateField(default=timezone.now)
+    added_on = models.DateField(default=timezone.localdate)

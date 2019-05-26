@@ -111,7 +111,8 @@ def comments(request):
         qs = Movie.objects.all()
         if movie_id not in [str(q) for q in qs]:
             response = {
-                'error': 'Movie with movie id {movie_id}, doesn\'t exist in DB'.format(movie_id=movie_id)
+                'error': 'Movie with movie id {movie_id}, doesn\'t exist in DB. Make sure to enter imdb id'.format
+                (movie_id=movie_id)
             }
             return JsonResponse(response)
 
@@ -137,7 +138,6 @@ def comments(request):
 
 
 def top(request):
-
     # create query set
     qs = Movie.objects.annotate(
         total_comments=Count('comment__comment'),
