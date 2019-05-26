@@ -1,5 +1,7 @@
 from datetime import datetime
 
+from django.db.models import Count, Window, F
+from django.db.models.functions import DenseRank
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.forms.models import model_to_dict
@@ -135,4 +137,14 @@ def comments(request):
 
 
 def top(request):
-    pass
+
+    # create query set
+    qs = Movie.objects.annotate(
+        total_comments=Count('comment__comment'),
+        rank=Window(
+            expression=DenseRank(),
+            order_by=F('total_comments').desc(),
+        )
+    ).values('id', 'total_comments', 'rank')
+
+    return qs_json_response(qs)
