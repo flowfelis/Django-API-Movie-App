@@ -10,4 +10,7 @@ urlpatterns = [
 
     # Comments
     path('comments', views.comments, name='comments'),
+
+    # top
+    path('top', views.top, name='top'),
 ]

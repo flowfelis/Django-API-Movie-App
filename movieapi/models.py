@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils import timezone
 
 
 class Movie(models.Model):
@@ -35,6 +36,4 @@ class Comment(models.Model):
 
     comment = models.TextField()
     movie = models.ForeignKey(Movie, on_delete=models.CASCADE, null=True)
-
-
-
+    date = models.DateField(default=timezone.now)

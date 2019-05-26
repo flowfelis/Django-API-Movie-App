@@ -1,11 +1,11 @@
 from datetime import datetime
 
-from django.http import HttpResponse
 from django.http import JsonResponse
-from django.core import serializers
 from django.views.decorators.csrf import csrf_exempt
+from django.forms.models import model_to_dict
 
 from .models import Movie, Comment
+from .helpers import all_json_response, qs_json_response
 
 import requests
 
@@ -86,14 +86,7 @@ def movies(request):
 
     # GET /movies
     else:
-
-        # Get all movies
-        qs = Movie.objects.all()
-
-        # serialize to JSON
-        qs_json = serializers.serialize('json', qs)
-
-        return HttpResponse(qs_json, content_type='application/json')
+        return all_json_response(Movie)
 
 
 @csrf_exempt
@@ -126,8 +119,7 @@ def comments(request):
         new_comment.save()
 
         # Return newly saved comment
-        new_comment_json = serializers.serialize('json', [new_comment])[1:-1]
-        return HttpResponse(new_comment_json, content_type='application/json')
+        return JsonResponse(model_to_dict(new_comment))
 
     # GET /comments
     else:
@@ -135,11 +127,12 @@ def comments(request):
         # Filter by movie ID, if user provided
         movie_id = request.GET.get('movie_id')
         if movie_id:
-            qs = Comment.objects.filter(movie__imdbid=movie_id)
-            qs_json = serializers.serialize('json', qs)
-            return HttpResponse(qs_json, content_type='application/json')
+            qs = Comment.objects.filter(movie__imdbid=movie_id).values()
+            return qs_json_response(qs)
 
-        # return all comments
-        all_comments = Comment.objects.all()
-        all_comments_json = serializers.serialize('json', all_comments)
-        return HttpResponse(all_comments_json, content_type='application/json')
+        # No filter provided by user, so return all
+        return all_json_response(Comment)
+
+
+def top(request):
+    pass
