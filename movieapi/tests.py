@@ -129,6 +129,7 @@ class MoviesTests(TestCase):
              '                "comment": "test comment",\n'
              '                "movie": 3,\n'
              '                "added_on": "' + str(timezone.localdate()) + '"\n'
+             '            }\n'
              )
         )
 
