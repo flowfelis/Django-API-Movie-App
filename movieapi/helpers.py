@@ -1,4 +1,5 @@
 import json
+from datetime import date
 
 from django.core.serializers.json import DjangoJSONEncoder
 from django.http import HttpResponse
@@ -33,3 +34,12 @@ def qs_json_response(qs):
 
     # return as Json Response
     return HttpResponse(qs_json, content_type='application/json')
+
+
+def model_to_json(model):
+    def date_to_str(o):
+        if isinstance(o, date):
+            return o.__str__()
+
+    model = model_to_dict(model)
+    return json.dumps(model, default=date_to_str)

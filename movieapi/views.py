@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from django.db.models import Count, Window, F
+from django.db.models import Count, Window, F, Q
 from django.db.models.functions import DenseRank
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -80,15 +80,33 @@ def movies(request):
             setattr(movie, key, value)
         movie.save()
 
-        # Return success msg
-        response = {
-            'success': '{movie_title} successfully added to DB'.format(movie_title=movie_title)
-        }
-        return JsonResponse(response)
+        return JsonResponse(model_to_dict(movie))
 
     # GET /movies
-    else:
-        return all_json_response(Movie)
+    elif request.method == 'GET':
+
+        order_by = request.GET.get('order_by')
+        desc = request.GET.get('desc')
+
+        # change to 'imdbrating' if 'rating' is provided
+        order_by = 'imdbrating' if order_by == 'rating' else order_by
+
+        # Send movies without ordering if order_by not provided
+        if not order_by:
+            return all_json_response(Movie)
+        else:
+            # if code is here, it means order_by is provided
+
+            # order_by accepts'title' and 'rating' only
+            if order_by != 'imdbrating' and order_by != 'title':
+                order_by = 'id'  # default to order_by id
+
+            if desc == 'true':
+                order_by = '-' + order_by
+
+            qs = Movie.objects.all().order_by(order_by).values()
+
+            return qs_json_response(qs)
 
 
 @csrf_exempt
@@ -125,10 +143,11 @@ def comments(request):
         return JsonResponse(model_to_dict(new_comment))
 
     # GET /comments
-    else:
+    elif request.method == 'GET':
+
+        movie_id = request.GET.get('movie_id')
 
         # Filter by movie ID, if user provided
-        movie_id = request.GET.get('movie_id')
         if movie_id:
             qs = Comment.objects.filter(movie__imdbid=movie_id).values()
             return qs_json_response(qs)
@@ -138,13 +157,30 @@ def comments(request):
 
 
 def top(request):
-    # create query set
-    qs = Movie.objects.annotate(
-        total_comments=Count('comment__comment'),
-        rank=Window(
-            expression=DenseRank(),
-            order_by=F('total_comments').desc(),
-        )
-    ).values('id', 'total_comments', 'rank')
+    if request.method == 'GET':
+        start_date = request.GET.get('start_date')
+        end_date = request.GET.get('end_date')
 
-    return qs_json_response(qs)
+        # Filter by specified date range, if provided
+        if start_date and end_date:
+            qs = Movie.objects \
+                .filter(comment__added_on__range=(start_date, end_date)) \
+                .annotate(total_comments=Count('comment__comment'),
+                          rank=Window(
+                              expression=DenseRank(),
+                              order_by=F('total_comments').desc(),
+                          )
+                          ).values('id', 'total_comments', 'rank')
+
+            return qs_json_response(qs)
+
+        else:
+            qs = Movie.objects \
+                .annotate(total_comments=Count('comment__comment'),
+                          rank=Window(
+                              expression=DenseRank(),
+                              order_by=F('total_comments').desc(),
+                          )
+                          ).values('id', 'total_comments', 'rank')
+
+            return qs_json_response(qs)
