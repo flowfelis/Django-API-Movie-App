@@ -1,7 +1,6 @@
 .DS_Store
 .idea/
 .vs_code/
-settings.py
 *.pyc
 /media/
 Testing/
