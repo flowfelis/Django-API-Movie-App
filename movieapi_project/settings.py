@@ -118,3 +118,4 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/2.2/howto/static-files/
 
 STATIC_URL = '/static/'
+OMDB_API_KEY = os.environ.get('OMDB_API_KEY')

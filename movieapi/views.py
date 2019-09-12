@@ -8,7 +8,8 @@ from django.forms.models import model_to_dict
 
 from .models import Movie, Comment
 from .helpers import all_json_response, qs_json_response
-
+from .serializers import MovieSerializer
+from django.conf import settings
 import requests
 
 
@@ -29,7 +30,7 @@ def movies(request):
 
         # Fetch movie from API
         payload = {
-            'apikey': 'dda316e4',
+            'apikey': settings.OMDB_API_KEY,
             't': movie_title
         }
         url = 'http://www.omdbapi.com'
@@ -106,7 +107,9 @@ def movies(request):
 
             qs = Movie.objects.all().order_by(order_by).values()
 
-            return qs_json_response(qs)
+            serializer = MovieSerializer(qs, many=True)
+            return JsonResponse(serializer.data, safe=False)
+            # return qs_json_response(qs)
 
 
 @csrf_exempt
