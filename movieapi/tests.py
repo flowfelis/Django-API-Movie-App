@@ -9,6 +9,7 @@ from django.urls import reverse
 from django.utils import timezone
 
 from movieapi.models import Movie, Comment
+from movieapi.serializers import MovieSerializer, CommentSerializer
 
 
 class MoviesTests(TestCase):
@@ -23,17 +24,6 @@ class MoviesTests(TestCase):
 
         self.assertJSONEqual(
             r.content,
-            # '{"id": 6, "title": "Fight Club", "rated": "R", "released": "1999-10-15", "runtime": "139 min", '
-            # '"genre": "Drama", "director": "David Fincher", "writer": "Chuck Palahniuk (novel), Jim Uhls ('
-            # 'screenplay)", "actors": "Edward Norton, Brad Pitt, Meat Loaf, Zach Grenier", "plot": "An insomniac '
-            # 'office worker and a devil-may-care soapmaker form an underground fight club that evolves into something '
-            # 'much, much more.", "language": "English", "country": "USA, Germany", "awards": "Nominated for 1 Oscar. '
-            # 'Another 10 wins & 34 nominations.", "poster": '
-            # '"https://m.media-amazon.com/images/M'
-            # '/MV5BMmEzNTkxYjQtZTc0MC00YTVjLTg5ZTEtZWMwOWVlYzY0NWIwXkEyXkFqcGdeQXVyNzkwMjQ5NzM@._V1_SX300.jpg", '
-            # '"metascore": 66, "imdbrating": 8.8, "imdbvotes": 1699612, "imdbid": "tt0137523", "type": "movie", '
-            # '"dvd": "2000-06-06", "boxoffice": 0, "production": "20th Century Fox", "website": '
-            # '"http://www.foxmovies.com/fightclub/"} '
             '''
             {
                 "id": 6,
@@ -313,12 +303,12 @@ class CommentTests(TestCase):
 
         r = self.client.get(reverse('movieapi:comments'))
 
-        all_values = Comment.objects.all().values()
-        all_json = json.dumps(list(all_values), cls=DjangoJSONEncoder)
+        all_values = Comment.get_all()
+        serializer = CommentSerializer(all_values, many=True)
 
         self.assertJSONEqual(
             r.content,
-            all_json
+            serializer.data
         )
         self.assertEqual(r.status_code, 200)
 
@@ -332,11 +322,11 @@ class CommentTests(TestCase):
 
         r = self.client.get(reverse('movieapi:comments'), {'movie_id': movie_id})
 
-        qs = Comment.objects.filter(movie__imdbid=movie_id).values()
-        qs_json = json.dumps(list(qs), cls=DjangoJSONEncoder)
+        qs = Comment.objects.filter(movie__imdbid=movie_id)
+        serializer = CommentSerializer(qs, many=True)
 
         self.assertJSONEqual(
             r.content,
-            qs_json
+            serializer.data
         )
         self.assertEqual(r.status_code, 200)

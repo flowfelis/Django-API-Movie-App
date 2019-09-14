@@ -41,3 +41,7 @@ class Comment(models.Model):
     comment = models.TextField()
     movie = models.ForeignKey(Movie, on_delete=models.CASCADE, null=True)
     added_on = models.DateField(default=timezone.localdate)
+
+    @classmethod
+    def get_all(cls):
+        return cls.objects.all()

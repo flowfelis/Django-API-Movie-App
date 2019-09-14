@@ -10,7 +10,7 @@ from rest_framework.response import Response
 
 from .models import Movie, Comment
 from .helpers import all_json_response, qs_json_response
-from .serializers import MovieSerializer
+from .serializers import MovieSerializer, CommentSerializer
 from django.conf import settings
 import requests
 
@@ -146,7 +146,8 @@ def comments(request):
         new_comment.save()
 
         # Return newly saved comment
-        return JsonResponse(model_to_dict(new_comment))
+        serializer = CommentSerializer(new_comment)
+        return Response(serializer.data)
 
     # GET /comments
     elif request.method == 'GET':
@@ -155,11 +156,13 @@ def comments(request):
 
         # Filter by movie ID, if user provided
         if movie_id:
-            qs = Comment.objects.filter(movie__imdbid=movie_id).values()
-            return qs_json_response(qs)
+            qs = Comment.objects.filter(movie__imdbid=movie_id)
+            serializer = CommentSerializer(qs, many=True)
+            return Response(serializer.data)
 
         # No filter provided by user, so return all
-        return all_json_response(Comment)
+        serializer = CommentSerializer(Comment.get_all(), many=True)
+        return Response(serializer.data)
 
 
 def top(request):
