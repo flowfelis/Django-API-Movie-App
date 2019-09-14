@@ -17,9 +17,6 @@ import requests
 
 @api_view(['GET', 'POST'])
 def movies(request):
-
-    all_movies = Movie.objects.all()
-
     # POST /movies
     if request.method == 'POST':
 
@@ -51,7 +48,7 @@ def movies(request):
             return Response(response, status.HTTP_400_BAD_REQUEST)
 
         # Validate duplicate movie doesn't exist in DB
-        if r.get('imdbID') in [str(q) for q in all_movies]:
+        if r.get('imdbID') in [str(q) for q in Movie.get_all()]:
             response = {
                 'error': '{movie_title} already exists in DB'.format(movie_title=movie_title)
             }
@@ -100,7 +97,7 @@ def movies(request):
         # Send movies without ordering if order_by not provided
         if not order_by:
             # return all_json_response(Movie)
-            serializer = MovieSerializer(all_movies, many=True)
+            serializer = MovieSerializer(Movie.get_all(), many=True)
             return Response(serializer.data)
         else:
             # if code is here, it means order_by is provided
@@ -112,7 +109,7 @@ def movies(request):
             if desc == 'true':
                 order_by = '-' + order_by
 
-            qs = all_movies.order_by(order_by)
+            qs = Movie.get_all().order_by(order_by)
 
             serializer = MovieSerializer(qs, many=True)
             return Response(serializer.data)
@@ -124,8 +121,8 @@ def comments(request):
     if request.method == 'POST':
 
         # Get user input
-        movie_id = request.POST.get('movie_id')
-        comment = request.POST.get('comment')
+        movie_id = request.data.get('movie_id')
+        comment = request.data.get('comment')
 
         # Validate User Input
         if not movie_id or not comment:
@@ -135,7 +132,7 @@ def comments(request):
             return Response(response, status.HTTP_400_BAD_REQUEST)
 
         # Validate movie exists
-        qs = Movie.objects.all()
+        qs = Movie.get_all()
         if movie_id not in [str(q) for q in qs]:
             response = {
                 'error': 'Movie with movie id {movie_id}, doesn\'t exist in DB. Make sure to enter imdb id'.format

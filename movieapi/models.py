@@ -29,6 +29,10 @@ class Movie(models.Model):
     production = models.CharField(max_length=100)
     website = models.URLField()
 
+    @classmethod
+    def get_all(cls):
+        return cls.objects.all()
+
 
 class Comment(models.Model):
     def __str__(self):
