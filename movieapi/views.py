@@ -10,7 +10,7 @@ from rest_framework.response import Response
 
 from .models import Movie, Comment
 from .helpers import all_json_response, qs_json_response
-from .serializers import MovieSerializer, CommentSerializer
+from .serializers import MovieSerializer, CommentSerializer, TopSerializer
 from django.conf import settings
 import requests
 
@@ -165,6 +165,7 @@ def comments(request):
         return Response(serializer.data)
 
 
+@api_view(['GET'])
 def top(request):
     if request.method == 'GET':
         start_date = request.GET.get('start_date')
@@ -181,7 +182,8 @@ def top(request):
                           )
                           ).values('id', 'total_comments', 'rank')
 
-            return qs_json_response(qs)
+            serializer = TopSerializer(qs, many=True)
+            return Response(serializer.data)
 
         else:
             qs = Movie.objects \
@@ -192,4 +194,5 @@ def top(request):
                           )
                           ).values('id', 'total_comments', 'rank')
 
-            return qs_json_response(qs)
+            serializer = TopSerializer(qs, many=True)
+            return Response(serializer.data)
