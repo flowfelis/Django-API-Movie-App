@@ -2,14 +2,11 @@ from datetime import datetime
 
 from django.db.models import Count, Window, F
 from django.db.models.functions import DenseRank
-from django.http import JsonResponse
-from django.forms.models import model_to_dict
 from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
 from .models import Movie, Comment
-from .helpers import all_json_response, qs_json_response
 from .serializers import MovieSerializer, CommentSerializer, TopSerializer
 from django.conf import settings
 import requests
