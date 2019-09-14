@@ -1,7 +1,6 @@
 import json
 from datetime import date
 
-from django.core.serializers import serialize
 from django.core.serializers.json import DjangoJSONEncoder
 from django.db.models import Count, Window, F
 from django.db.models.functions import DenseRank
@@ -9,7 +8,6 @@ from django.test import TestCase
 from django.urls import reverse
 from django.utils import timezone
 
-from movieapi.helpers import model_to_json
 from movieapi.models import Movie, Comment
 
 
@@ -25,6 +23,17 @@ class MoviesTests(TestCase):
 
         self.assertJSONEqual(
             r.content,
+            # '{"id": 6, "title": "Fight Club", "rated": "R", "released": "1999-10-15", "runtime": "139 min", '
+            # '"genre": "Drama", "director": "David Fincher", "writer": "Chuck Palahniuk (novel), Jim Uhls ('
+            # 'screenplay)", "actors": "Edward Norton, Brad Pitt, Meat Loaf, Zach Grenier", "plot": "An insomniac '
+            # 'office worker and a devil-may-care soapmaker form an underground fight club that evolves into something '
+            # 'much, much more.", "language": "English", "country": "USA, Germany", "awards": "Nominated for 1 Oscar. '
+            # 'Another 10 wins & 34 nominations.", "poster": '
+            # '"https://m.media-amazon.com/images/M'
+            # '/MV5BMmEzNTkxYjQtZTc0MC00YTVjLTg5ZTEtZWMwOWVlYzY0NWIwXkEyXkFqcGdeQXVyNzkwMjQ5NzM@._V1_SX300.jpg", '
+            # '"metascore": 66, "imdbrating": 8.8, "imdbvotes": 1699612, "imdbid": "tt0137523", "type": "movie", '
+            # '"dvd": "2000-06-06", "boxoffice": 0, "production": "20th Century Fox", "website": '
+            # '"http://www.foxmovies.com/fightclub/"} '
             '''
             {
                 "id": 6,
@@ -40,10 +49,10 @@ class MoviesTests(TestCase):
                 "language": "English",
                 "country": "USA, Germany",
                 "awards": "Nominated for 1 Oscar. Another 10 wins & 34 nominations.",
-                "poster": "https://m.media-amazon.com/images/M/MV5BMjJmYTNkNmItYjYyZC00MGUxLWJhNWMtZDY4Nzc1MDAwMzU5XkEyXkFqcGdeQXVyNzkwMjQ5NzM@._V1_SX300.jpg",
+                "poster": "https://m.media-amazon.com/images/M/MV5BMmEzNTkxYjQtZTc0MC00YTVjLTg5ZTEtZWMwOWVlYzY0NWIwXkEyXkFqcGdeQXVyNzkwMjQ5NzM@._V1_SX300.jpg",
                 "metascore": 66,
-                "imdbrating": 8.8,
-                "imdbvotes": 1665349,
+                "imdbrating": "8.8",
+                "imdbvotes": 1699612,
                 "imdbid": "tt0137523",
                 "type": "movie",
                 "dvd": "2000-06-06",
@@ -53,6 +62,7 @@ class MoviesTests(TestCase):
             }
             '''
         )
+        self.assertEqual(r.status_code, 200)
 
     def test_post_movie_without_data(self):
         """
@@ -65,6 +75,7 @@ class MoviesTests(TestCase):
             r.content,
             '{"error": "Please provide a movie title"}'
         )
+        self.assertEqual(r.status_code, 400)
 
     def test_post_movie_not_exist_in_api(self):
         """
@@ -77,6 +88,7 @@ class MoviesTests(TestCase):
             r.content,
             '{"error": "There is no movie like fight clubqwerasdfasrwer"}'
         )
+        self.assertEqual(r.status_code, 400)
 
     def test_post_movie_exist_in_api(self):
         """
@@ -89,6 +101,7 @@ class MoviesTests(TestCase):
             r.content,
             '{"error": "braveheart already exists in DB"}'
         )
+        self.assertEqual(r.status_code, 400)
 
     def test_get_movies(self):
         """
@@ -104,6 +117,7 @@ class MoviesTests(TestCase):
             r.content,
             all_json
         )
+        self.assertEqual(r.status_code, 200)
 
     def test_get_movies_order_by_rating(self):
         """
@@ -120,6 +134,7 @@ class MoviesTests(TestCase):
             r.content,
             qs_json
         )
+        self.assertEqual(r.status_code, 200)
 
     def test_get_movies_order_by_rating_desc(self):
         """
@@ -136,6 +151,7 @@ class MoviesTests(TestCase):
             r.content,
             qs_json
         )
+        self.assertEqual(r.status_code, 200)
 
     def test_get_movies_order_by_title(self):
         """
@@ -152,6 +168,7 @@ class MoviesTests(TestCase):
             r.content,
             qs_json
         )
+        self.assertEqual(r.status_code, 200)
 
     def test_get_movies_order_by_title_desc(self):
         """
@@ -168,6 +185,7 @@ class MoviesTests(TestCase):
             r.content,
             qs_json
         )
+        self.assertEqual(r.status_code, 200)
 
     def test_get_movie_top_all(self):
         """
@@ -191,6 +209,7 @@ class MoviesTests(TestCase):
             r.content,
             qs_json
         )
+        self.assertEqual(r.status_code, 200)
 
     def test_get_movie_top_date_range(self):
         """
@@ -218,6 +237,7 @@ class MoviesTests(TestCase):
             r.content,
             qs_json
         )
+        self.assertEqual(r.status_code, 200)
 
 
 class CommentTests(TestCase):
@@ -235,6 +255,7 @@ class CommentTests(TestCase):
             r1.content,
             '{"error": "Please provide movie ID and comment"}'
         )
+        self.assertEqual(r1.status_code, 400)
 
         # omit only comment
         r2 = self.client.post(reverse('movieapi:comments'), {'movie_id': 'tt0112573'})
@@ -242,12 +263,14 @@ class CommentTests(TestCase):
             r2.content,
             '{"error": "Please provide movie ID and comment"}'
         )
+        self.assertEqual(r2.status_code, 400)
 
         r3 = self.client.post(reverse('movieapi:comments'), {'comment': 'test comment'})
         self.assertJSONEqual(
             r3.content,
             '{"error": "Please provide movie ID and comment"}'
         )
+        self.assertEqual(r3.status_code, 400)
 
     def test_post_comment_movie_not_exist(self):
         """
@@ -260,6 +283,7 @@ class CommentTests(TestCase):
             r.content,
             '{"error": "Movie with movie id testid, doesn\'t exist in DB. Make sure to enter imdb id"}'
         )
+        self.assertEqual(r.status_code, 400)
 
     def test_post_comment_successful(self):
         """
@@ -278,8 +302,8 @@ class CommentTests(TestCase):
                     '"added_on": "' + str(timezone.localdate()) + '"'
                                                                   '}'
             )
-
         )
+        self.assertEqual(r.status_code, 200)
 
     def test_get_comment_all(self):
         """
@@ -296,6 +320,7 @@ class CommentTests(TestCase):
             r.content,
             all_json
         )
+        self.assertEqual(r.status_code, 200)
 
     def test_get_comment_by_movieid(self):
         """
@@ -314,3 +339,4 @@ class CommentTests(TestCase):
             r.content,
             qs_json
         )
+        self.assertEqual(r.status_code, 200)

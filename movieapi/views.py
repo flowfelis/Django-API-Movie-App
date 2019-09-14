@@ -1,10 +1,12 @@
 from datetime import datetime
 
-from django.db.models import Count, Window, F, Q
+from django.db.models import Count, Window, F
 from django.db.models.functions import DenseRank
 from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
 from django.forms.models import model_to_dict
+from rest_framework import status
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
 
 from .models import Movie, Comment
 from .helpers import all_json_response, qs_json_response
@@ -13,20 +15,23 @@ from django.conf import settings
 import requests
 
 
-@csrf_exempt
+@api_view(['GET', 'POST'])
 def movies(request):
+
+    all_movies = Movie.objects.all()
+
     # POST /movies
     if request.method == 'POST':
 
         # Get User Input
-        movie_title = request.POST.get('movie_title')
+        movie_title = request.data.get('movie_title')
 
         # Validate User Input
         if not movie_title:
             response = {
                 'error': 'Please provide a movie title'
             }
-            return JsonResponse(response)
+            return Response(response, status.HTTP_400_BAD_REQUEST)
 
         # Fetch movie from API
         payload = {
@@ -43,15 +48,14 @@ def movies(request):
             response = {
                 'error': 'There is no movie like {movie_title}'.format(movie_title=movie_title)
             }
-            return JsonResponse(response)
+            return Response(response, status.HTTP_400_BAD_REQUEST)
 
         # Validate duplicate movie doesn't exist in DB
-        qs = Movie.objects.all()
-        if r.get('imdbID') in [str(q) for q in qs]:
+        if r.get('imdbID') in [str(q) for q in all_movies]:
             response = {
                 'error': '{movie_title} already exists in DB'.format(movie_title=movie_title)
             }
-            return JsonResponse(response)
+            return Response(response, status.HTTP_400_BAD_REQUEST)
 
         # Save Fetched movie from API to DB
         movie = Movie()
@@ -81,7 +85,8 @@ def movies(request):
             setattr(movie, key, value)
         movie.save()
 
-        return JsonResponse(model_to_dict(movie))
+        serializer = MovieSerializer(movie)
+        return Response(serializer.data)
 
     # GET /movies
     elif request.method == 'GET':
@@ -94,7 +99,9 @@ def movies(request):
 
         # Send movies without ordering if order_by not provided
         if not order_by:
-            return all_json_response(Movie)
+            # return all_json_response(Movie)
+            serializer = MovieSerializer(all_movies, many=True)
+            return Response(serializer.data)
         else:
             # if code is here, it means order_by is provided
 
@@ -105,14 +112,13 @@ def movies(request):
             if desc == 'true':
                 order_by = '-' + order_by
 
-            qs = Movie.objects.all().order_by(order_by).values()
+            qs = all_movies.order_by(order_by)
 
             serializer = MovieSerializer(qs, many=True)
-            return JsonResponse(serializer.data, safe=False)
-            # return qs_json_response(qs)
+            return Response(serializer.data)
 
 
-@csrf_exempt
+@api_view(['GET', 'POST'])
 def comments(request):
     # POST /comments
     if request.method == 'POST':
@@ -126,7 +132,7 @@ def comments(request):
             response = {
                 'error': 'Please provide movie ID and comment'
             }
-            return JsonResponse(response)
+            return Response(response, status.HTTP_400_BAD_REQUEST)
 
         # Validate movie exists
         qs = Movie.objects.all()
@@ -135,7 +141,7 @@ def comments(request):
                 'error': 'Movie with movie id {movie_id}, doesn\'t exist in DB. Make sure to enter imdb id'.format
                 (movie_id=movie_id)
             }
-            return JsonResponse(response)
+            return Response(response, status.HTTP_400_BAD_REQUEST)
 
         # Save comment to DB
         movie = Movie.objects.get(imdbid=movie_id)
