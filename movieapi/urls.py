@@ -6,7 +6,7 @@ app_name = 'movieapi'
 urlpatterns = [
 
     # Movies
-    path('movies', views.movies, name='movies'),
+    path('movies', views.MoviesView.as_view(), name='movies'),
 
     # Comments
     path('comments', views.comments, name='comments'),
