@@ -1,7 +1,5 @@
-import json
 from datetime import date
 
-from django.core.serializers.json import DjangoJSONEncoder
 from django.db.models import Count, Window, F
 from django.db.models.functions import DenseRank
 from django.test import TestCase
@@ -9,7 +7,7 @@ from django.urls import reverse
 from django.utils import timezone
 
 from movieapi.models import Movie, Comment
-from movieapi.serializers import MovieSerializer, CommentSerializer
+from movieapi.serializers import MovieSerializer, CommentSerializer, TopSerializer
 
 
 class MoviesTests(TestCase):
@@ -99,13 +97,13 @@ class MoviesTests(TestCase):
         :return: all movies in json
         """
 
-        all_values = Movie.objects.values()
-        all_json = json.dumps(list(all_values), cls=DjangoJSONEncoder)
+        all_values = Movie.get_all()
+        serializer = MovieSerializer(all_values, many=True)
 
         r = self.client.get(reverse('movieapi:movies'))
         self.assertJSONEqual(
             r.content,
-            all_json
+            serializer.data
         )
         self.assertEqual(r.status_code, 200)
 
@@ -117,12 +115,12 @@ class MoviesTests(TestCase):
 
         r = self.client.get(reverse('movieapi:movies'), {'order_by': 'rating'})
 
-        qs = Movie.objects.all().order_by('imdbrating').values()
-        qs_json = json.dumps(list(qs), cls=DjangoJSONEncoder)
+        qs = Movie.get_all().order_by('imdbrating')
+        serializer = MovieSerializer(qs, many=True)
 
         self.assertJSONEqual(
             r.content,
-            qs_json
+            serializer.data
         )
         self.assertEqual(r.status_code, 200)
 
@@ -134,12 +132,12 @@ class MoviesTests(TestCase):
 
         r = self.client.get(reverse('movieapi:movies'), {'order_by': 'rating', 'desc': 'true'})
 
-        qs = Movie.objects.all().order_by('-imdbrating').values()
-        qs_json = json.dumps(list(qs), cls=DjangoJSONEncoder)
+        qs = Movie.get_all().order_by('-imdbrating')
+        serializer = MovieSerializer(qs, many=True)
 
         self.assertJSONEqual(
             r.content,
-            qs_json
+            serializer.data
         )
         self.assertEqual(r.status_code, 200)
 
@@ -151,12 +149,12 @@ class MoviesTests(TestCase):
 
         r = self.client.get(reverse('movieapi:movies'), {'order_by': 'title'})
 
-        qs = Movie.objects.all().order_by('title').values()
-        qs_json = json.dumps(list(qs), cls=DjangoJSONEncoder)
+        qs = Movie.get_all().order_by('title')
+        serializer = MovieSerializer(qs, many=True)
 
         self.assertJSONEqual(
             r.content,
-            qs_json
+            serializer.data
         )
         self.assertEqual(r.status_code, 200)
 
@@ -168,12 +166,12 @@ class MoviesTests(TestCase):
 
         r = self.client.get(reverse('movieapi:movies'), {'order_by': 'title', 'desc': 'true'})
 
-        qs = Movie.objects.all().order_by('-title').values()
-        qs_json = json.dumps(list(qs), cls=DjangoJSONEncoder)
+        qs = Movie.get_all().order_by('-title')
+        serializer = MovieSerializer(qs, many=True)
 
         self.assertJSONEqual(
             r.content,
-            qs_json
+            serializer.data
         )
         self.assertEqual(r.status_code, 200)
 
@@ -193,11 +191,11 @@ class MoviesTests(TestCase):
                       )
                       ).values('id', 'total_comments', 'rank')
 
-        qs_json = json.dumps(list(qs), cls=DjangoJSONEncoder)
+        serializer = TopSerializer(qs, many=True)
 
         self.assertJSONEqual(
             r.content,
-            qs_json
+            serializer.data
         )
         self.assertEqual(r.status_code, 200)
 
@@ -221,11 +219,11 @@ class MoviesTests(TestCase):
                       )
                       ).values('id', 'total_comments', 'rank')
 
-        qs_json = json.dumps(list(qs), cls=DjangoJSONEncoder)
+        serializer = TopSerializer(qs, many=True)
 
         self.assertJSONEqual(
             r.content,
-            qs_json
+            serializer.data
         )
         self.assertEqual(r.status_code, 200)
 
