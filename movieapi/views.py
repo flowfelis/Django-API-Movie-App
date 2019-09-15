@@ -157,59 +157,9 @@ class CommentsView(APIView):
         return Response(serializer.data)
 
 
-# @api_view(['GET', 'POST'])
-# def comments(request):
-#     # POST /comments
-#     if request.method == 'POST':
-#
-#         # Get user input
-#         movie_id = request.data.get('movie_id')
-#         comment = request.data.get('comment')
-#
-#         # Validate User Input
-#         if not movie_id or not comment:
-#             response = {
-#                 'error': 'Please provide movie ID and comment'
-#             }
-#             return Response(response, status.HTTP_400_BAD_REQUEST)
-#
-#         # Validate movie exists
-#         qs = Movie.get_all()
-#         if movie_id not in [str(q) for q in qs]:
-#             response = {
-#                 'error': 'Movie with movie id {movie_id}, doesn\'t exist in DB. Make sure to enter imdb id'.format
-#                 (movie_id=movie_id)
-#             }
-#             return Response(response, status.HTTP_400_BAD_REQUEST)
-#
-#         # Save comment to DB
-#         movie = Movie.objects.get(imdbid=movie_id)
-#         new_comment = Comment(comment=comment, movie=movie)
-#         new_comment.save()
-#
-#         # Return newly saved comment
-#         serializer = CommentSerializer(new_comment)
-#         return Response(serializer.data)
-#
-#     # GET /comments
-#     elif request.method == 'GET':
-#
-#         movie_id = request.GET.get('movie_id')
-#
-#         # Filter by movie ID, if user provided
-#         if movie_id:
-#             qs = Comment.objects.filter(movie__imdbid=movie_id)
-#             serializer = CommentSerializer(qs, many=True)
-#             return Response(serializer.data)
-#
-#         # No filter provided by user, so return all
-#         serializer = CommentSerializer(Comment.get_all(), many=True)
-#         return Response(serializer.data)
-#
+class TopView(APIView):
+    def get(self, request, format=None):
 
-@api_view(['GET'])
-def top(request):
-    if request.method == 'GET':
         start_date = request.GET.get('start_date')
         end_date = request.GET.get('end_date')
 
