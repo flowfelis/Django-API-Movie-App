@@ -6,7 +6,9 @@
 - For POST /comments and GET /comments, **imdbID** should be passed, instead of application database primary key id.
 Because imdbID's are guaranteed to be unique.
 - Tests are at movieapi/tests.py, and test data is available at movieapi/fixtures/test_data.json. `manage.py loaddata` can be used.
-- No framework is used, only requests library to make a call to external movie API
+##### Which Third Party Libraries Are Used?
+- Django Rest Framework for easy API Creation,
+- requests library to make a call to external movie API
 
 ### How To Run It Locally
 - Clone this repo
