@@ -17,6 +17,8 @@ Because imdbID's are guaranteed to be unique.
 - Create a PostgreSql database with *database name --> moviedb*, *database password --> '1'* and *db user name --> moviedbuser*
 on your localhost. If you change any of these, you should change DATABASE setting in settings.py
 - Run `./manage.py migrate` to create tables etc. in your database.
+- An environment variable `OMDB_API_KEY=dda316e4` has to be available in your system before running the server,
+in order to connect to the OMDB API. Run `export OMDB_API_KEY=dda316e4`, if on Unix/Linux based system.
 - Run django dev server `./manage.py runserver` 
 - API is served at localhost:8000
 
