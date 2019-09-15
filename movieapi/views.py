@@ -39,14 +39,14 @@ class MoviesView(APIView):
         # Validate movie exists in API
         if r.get('Response') == 'False':
             response = {
-                'error': 'There is no movie like {movie_title}'.format(movie_title=movie_title)
+                'error': f'There is no movie like {movie_title}'
             }
             return Response(response, status.HTTP_400_BAD_REQUEST)
 
         # Validate duplicate movie doesn't exist in DB
         if r.get('imdbID') in [str(q) for q in Movie.get_all()]:
             response = {
-                'error': '{movie_title} already exists in DB'.format(movie_title=movie_title)
+                'error': f'{movie_title} already exists in DB'
             }
             return Response(response, status.HTTP_400_BAD_REQUEST)
 
@@ -128,8 +128,7 @@ class CommentsView(APIView):
         qs = Movie.get_all()
         if movie_id not in [str(q) for q in qs]:
             response = {
-                'error': 'Movie with movie id {movie_id}, doesn\'t exist in DB. Make sure to enter imdb id'.format
-                (movie_id=movie_id)
+                'error': f'Movie with movie id {movie_id}, doesn\'t exist in DB. Make sure to enter imdb id'
             }
             return Response(response, status.HTTP_400_BAD_REQUEST)
 
