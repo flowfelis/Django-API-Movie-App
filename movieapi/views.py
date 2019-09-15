@@ -3,7 +3,6 @@ from datetime import datetime
 from django.db.models import Count, Window, F
 from django.db.models.functions import DenseRank
 from rest_framework import status
-from rest_framework.decorators import api_view
 from rest_framework.views import APIView
 from rest_framework.response import Response
 
@@ -158,8 +157,14 @@ class CommentsView(APIView):
 
 
 class TopView(APIView):
-
     def create_qs_for_top(self, with_filter=False, start_date='', end_date=''):
+        """
+        Creates query string according to date filter, if provided by the user.
+        :param with_filter: boolean, to create with filter or not.
+        :param start_date: string, start date of the filter.
+        :param end_date: string, end date of the filter
+        :return: Query String for Top, according to date filter.
+        """
         qs = Movie.objects
         if with_filter:
             qs = qs.filter(comment__added_on__range=(start_date, end_date))
@@ -183,27 +188,3 @@ class TopView(APIView):
 
         serializer = TopSerializer(qs, many=True)
         return Response(serializer.data)
-
-        # qs = Movie.objects \
-        #     .filter(comment__added_on__range=(start_date, end_date)) \
-        #     .annotate(total_comments=Count('comment__comment'),
-        #               rank=Window(
-        #                   expression=DenseRank(),
-        #                   order_by=F('total_comments').desc(),
-        #               )
-        #               ).values('id', 'total_comments', 'rank')
-        #
-        # serializer = TopSerializer(qs, many=True)
-        # return Response(serializer.data)
-
-        # else:
-        # qs = Movie.objects \
-        #     .annotate(total_comments=Count('comment__comment'),
-        #               rank=Window(
-        #                   expression=DenseRank(),
-        #                   order_by=F('total_comments').desc(),
-        #               )
-        #               ).values('id', 'total_comments', 'rank')
-        #
-        # serializer = TopSerializer(qs, many=True)
-        # return Response(serializer.data)
