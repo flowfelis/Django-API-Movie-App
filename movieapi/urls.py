@@ -9,7 +9,7 @@ urlpatterns = [
     path('movies', views.MoviesView.as_view(), name='movies'),
 
     # Comments
-    path('comments', views.comments, name='comments'),
+    path('comments', views.CommentsView.as_view(), name='comments'),
 
     # top
     path('top', views.top, name='top'),
