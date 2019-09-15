@@ -79,7 +79,7 @@ class MoviesView(APIView):
         movie.save()
 
         serializer = MovieSerializer(movie)
-        return Response(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def get(self, request, format=None):
 
@@ -139,7 +139,7 @@ class CommentsView(APIView):
 
         # Return newly saved comment
         serializer = CommentSerializer(new_comment)
-        return Response(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def get(self, request, format=None):
         movie_id = request.GET.get('movie_id')

@@ -52,7 +52,7 @@ class MoviesTests(TestCase):
             }
             '''
         )
-        self.assertEqual(r.status_code, 200)
+        self.assertEqual(r.status_code, 201)
 
     def test_post_movie_without_data(self):
         """
@@ -293,7 +293,7 @@ class CommentTests(TestCase):
                                                                   '}'
             )
         )
-        self.assertEqual(r.status_code, 200)
+        self.assertEqual(r.status_code, 201)
 
     def test_get_comment_all(self):
         """
