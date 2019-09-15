@@ -11,6 +11,6 @@ urlpatterns = [
     # Comments
     path('comments', views.CommentsView.as_view(), name='comments'),
 
-    # top
+    # Top
     path('top', views.TopView.as_view(), name='top'),
 ]
