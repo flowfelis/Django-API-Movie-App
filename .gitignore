@@ -12,4 +12,3 @@ __pycache__/
 postgres_data/
 .env
 .env.db
-docker-compose.prod.yml
