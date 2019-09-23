@@ -6,7 +6,6 @@
 Testing/
 Design Files
 .dockerignore
-DockerFile
 .sandbox/
 db.sqlite3
 __pycache__/
