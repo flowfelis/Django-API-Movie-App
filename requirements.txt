@@ -2,6 +2,7 @@ certifi==2019.3.9
 chardet==3.0.4
 Django==2.2.5
 djangorestframework==3.10.3
+gunicorn==19.9.0
 idna==2.8
 psycopg2-binary==2.8.2
 pytz==2019.1
