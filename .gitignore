@@ -10,5 +10,5 @@ Design Files
 db.sqlite3
 __pycache__/
 postgres_data/
-.env
-.env.db
+/.env.prod
+/.env.db.prod
