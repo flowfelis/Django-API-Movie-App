@@ -10,3 +10,6 @@ DockerFile
 .sandbox/
 db.sqlite3
 __pycache__/
+postgres_data/
+.env
+.env.db
